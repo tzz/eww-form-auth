@@ -1,0 +1,70 @@
+#+TITLE: eww-form-auth — fill eww login forms from auth-source
+
+Emacs keeps passwords in auth-source (=~/.authinfo.gpg=, pass, the macOS
+keychain), and =url.el= already answers HTTP Basic and Digest challenges
+from it.  HTML login forms in eww get nothing: a password input is a
+text field you type into.  This library fills that gap.
+
+* Use
+
+In an eww buffer showing a login page:
+
+- =C-c C-a= (=M-x eww-form-auth-fill=): find the login form (the one under
+  point, else the first with a password field), look the page's host
+  up in auth-source, put the login into the text field before the
+  password field and the secret into the password field.  With a
+  prefix argument, or =eww-form-auth-submit-after-fill=, submit too.
+  Several entries for one host are offered with completion.
+- =C-c C-s= (=M-x eww-form-auth-save=): after you typed a login and a
+  password into the form, store them for the host through auth-source
+  (=auth-source-save-behavior= decides whether it asks).
+
+The stored entry is the ordinary one:
+
+#+begin_example
+machine example.com login me@example.com password s3cret
+#+end_example
+
+* Setup
+
+#+begin_src emacs-lisp
+(require 'eww-form-auth)   ; binds the keys when eww loads
+#+end_src
+
+Set =eww-form-auth-bind-keys= to nil before loading to keep the keys
+free.  =eww-form-auth-login-types= and =eww-form-auth-login-names= tune
+which text field is taken as the login.
+
+* Limits
+
+They are eww's.  A site whose login runs through JavaScript, or needs
+a token a script fetches, cannot be logged into from eww, with or
+without this library.  Plain POST forms, including ones with hidden
+CSRF fields rendered in the HTML, work.
+
+* Name
+
+auth-source is the store; =url.el= serves HTTP auth from it.  This
+library serves HTML *forms* in eww, hence form-auth, not HTTP auth.
+
+* Requirements
+
+Emacs 29.1 or newer.  No libxml2 is needed for the tests.
+
+* Tests
+
+#+begin_example
+make test
+#+end_example
+
+* License
+
+Apache License 2.0; see =LICENSE=.
+
+* Authorship
+
+This package was written with substantial assistance from Claude
+(Anthropic's AI model), directed, reviewed and tested by Teodor
+Zlatanov, who maintains it and is responsible for its contents.
+Because of that, it is not offered to GNU ELPA or NonGNU ELPA, whose
+policy excludes LLM-generated contributions.
